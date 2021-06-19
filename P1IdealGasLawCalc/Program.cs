@@ -32,6 +32,11 @@ namespace P1IdealGasLawCalc
 
                 if(molecularWeight != -1)
                 {
+
+                    // GLENN: (suggestion) Be a little careful here, comparing == with doubles is hazardous.
+                    // Doubles can sometimes be slightly inaccurate, especially when division is involved.
+                    // A more fail-safe way to do this would be to check if < 0
+
                     //ask user for all needed variables and converts them to doubles with Conver.ToDouble() method
                     Console.WriteLine("Please enter the volume of {0} in cubic meters: ", gasName);
                     gasVolume = Convert.ToDouble(Console.ReadLine());
@@ -56,12 +61,22 @@ namespace P1IdealGasLawCalc
                 answer = Console.ReadLine();
 
             } while (answer == "y" || answer == "Y");
+
+            // GLENN: Be careful, use String.Equals(...), or another.equals(...) instead.
         }
 
         static void GetMolecularWeights(ref string[] gasNames, ref double[] molecularWeights, out int count)
         {
             count = 0;
             string[] lines = File.ReadAllLines("MolecularWeightsGasesAndVapors.csv");
+
+            // GLENN: (suggestion) You can allocate your array based on the number of lines
+            //
+            // One way to make this code cleanear would be to allocate your arrays after you read the lines.
+            // You can do this:
+            // gasNames = new string[lines.Length - 1];
+            // molecularWeights = new double[lines.Length - 1];
+
             for (int i = 0; i < lines.Length; ++i) //runs through all of the lines in the csv file
             {
                 if(i != 0)
@@ -70,7 +85,9 @@ namespace P1IdealGasLawCalc
                     string[] gasWeight = lines[i].Split(",");
                     gasNames[count] = gasWeight[0];
                     molecularWeights[count] = Convert.ToDouble(gasWeight[1]);
-                    Console.WriteLine(gasNames[i] + molecularWeights[i]);
+
+                    // GLENN: Looks like you left some debug output here
+                    // Console.WriteLine(gasNames[i] + molecularWeights[i]);
                     count++;
                 }
             }
@@ -88,6 +105,14 @@ namespace P1IdealGasLawCalc
         private static double GetMolecularWeightFromName(string gasName, string[] gasNames, double[] molecularWeights, int countGases)
         {
             int index = Array.IndexOf(gasNames, gasName); //identify the index of the gas being searched for
+
+            // GLENN: If the gas name is not present, index will be negative 1 and the following line will crash;
+            // You'll want to do something like this:
+            //
+            if (index == -1) 
+            {
+                return -1;
+            }
             return molecularWeights[index];//return the molecularWeight of that index
         }
 
